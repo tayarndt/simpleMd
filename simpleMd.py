@@ -24,7 +24,7 @@ class SimpleMd(wx.App):
         exit_item= wx.MenuItem(file_menu, wx.ID_EXIT, "&Exit")
         file_menu.Append(wx.ID_EXIT, "&Exit\ALT+F4")
         menu_bar.Append(file_menu, "&File")
-        self.Bind(wx.EVT_MENU, self.OnNew, id=wx.ID_NEW)
+        # self.Bind(wx.EVT_MENU, self.OnNew, id=wx.ID_NEW)
         self.Bind(wx.EVT_MENU, self.OnOpen, id=wx.ID_OPEN)
         self.Bind(wx.EVT_MENU, self.OnSave, id=wx.ID_SAVE)
         self.Bind(wx.EVT_MENU, self.OnSaveAs, id=wx.ID_SAVEAS)
@@ -78,17 +78,19 @@ class SimpleMd(wx.App):
         frame.SetSizer(sizer)
         frame.Fit()
         return True
-
     def on_unordered_list(self, event=None):
         self.Editor.WriteText("- ")
         self.is_list = True
+
     def on_enter(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN and self.is_list and event.ShiftDown():
             self.is_list = False
+            self.Editor.WriteText("\n")
         elif event.GetKeyCode() == wx.WXK_RETURN and self.is_list:
             self.Editor.WriteText("\n- ")
         else:
             event.Skip()
+
 
     def on_italic(self, event=None):
         self.Editor.WriteText("*")
@@ -128,14 +130,6 @@ class SimpleMd(wx.App):
             save_file.write(editor.GetValue())
             save_file.close()
 
-
-    def OnNew(self, event):
-        new_file_dialog = wx.TextEntryDialog(None, "Enter a file name", "New File")
-        if new_file_dialog.ShowModal() == wx.ID_OK:
-            new_file_name = new_file_dialog.GetValue()
-            new_file_dialog.Destroy()
-            new_file = open(new_file_name, "w")
-            new_file.close()
 
     def OnOpen(self, event):
         open_file_dialog = wx.FileDialog(None, "Open File", "", "", "*.*", wx.FD_OPEN)
