@@ -9,6 +9,7 @@ class SimpleMd(wx.App):
         self.Editor = wx.TextCtrl(frame, -1, style=wx.TE_MULTILINE)
         self.Editor.Bind(wx.EVT_KEY_DOWN, self.on_key_press)
         self.Editor.Bind(wx.EVT_KEY_DOWN, self.on_enter)
+        self.Editor.Bind(wx.EVT_KEY_DOWN, self.on_dash)
 
         menu_bar = wx.MenuBar()
         file_menu = wx.Menu()
@@ -53,7 +54,7 @@ class SimpleMd(wx.App):
         italic_text = format_menu.Append(wx.ID_ANY, "Italic\tCtrl+I", "Insert italic text")
         format_menu.AppendSeparator()
         unordered_list = format_menu.Append(wx.ID_ANY, "Unordered List\tCtrl+U", "Insert an unordered list")
-        ordered_list = format_menu.Append(wx.ID_ANY, "Ordered List\tCtrl+O", "Insert an ordered list")
+        ordered_list = format_menu.Append(wx.ID_ANY, "Ordered List\tCtrl+SHIFT+O", "Insert an ordered list")
         format_menu.AppendSeparator()
         blockquote = format_menu.Append(wx.ID_ANY, "Blockquote\tCtrl+Q", "Insert a blockquote")
         code_block = format_menu.Append(wx.ID_ANY, "Code Block\tCtrl+K", "Insert a code block")
@@ -61,7 +62,7 @@ class SimpleMd(wx.App):
         link = format_menu.Append(wx.ID_ANY, "Link\tCtrl+L", "Insert a link")
         image = format_menu.Append(wx.ID_ANY, "Image\tCtrl+G", "Insert an image")
         self.Bind(wx.EVT_MENU, self.on_unordered_list, unordered_list)
-        # self.Bind(wx.EVT_MENU, self.on_ordered_list, ordered_list)
+        self.Bind(wx.EVT_MENU, self.on_ordered_list, ordered_list)
         self.Bind(wx.EVT_MENU, self.on_italic, italic_text)
         self.Bind(wx.EVT_MENU, self.on_bold, bold_text)
         self.Bind(wx.EVT_MENU, self.on_heading_1, heading_1)
@@ -78,11 +79,11 @@ class SimpleMd(wx.App):
         frame.SetSizer(sizer)
         frame.Fit()
         return True
+
     def on_unordered_list(self, event=None):
         self.Editor.WriteText("- ")
         self.is_list = True
-
-    def on_enter(self, event):
+    def on_dash(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN and self.is_list and event.ShiftDown():
             self.is_list = False
             self.Editor.WriteText("\n")
@@ -91,6 +92,19 @@ class SimpleMd(wx.App):
         else:
             event.Skip()
 
+
+    def on_ordered_list(self, event=None):
+        self.Editor.WriteText("1. ")
+        self.list_count = 2
+    def on_enter(self, event):
+        if event.GetKeyCode() == wx.WXK_RETURN and self.list_count > 0 and event.ShiftDown():
+            self.list_count = 0
+            self.Editor.WriteText("\n")
+        elif event.GetKeyCode() == wx.WXK_RETURN and self.list_count > 0:
+            self.Editor.WriteText("\n" + str(self.list_count) + ". ")
+            self.list_count += 1
+        else:
+            event.Skip()
 
     def on_italic(self, event=None):
         self.Editor.WriteText("*")
